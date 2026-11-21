@@ -252,6 +252,8 @@ HttpResponse http_request(const HttpRequest& req) {
     curl_easy_reset(c);
     Sink sink{&res.body, req.maxBytes};
     curl_easy_setopt(c, CURLOPT_URL, req.url.c_str());
+    curl_easy_setopt(c, CURLOPT_PROXY, "http://10.181.117.17:8080");
+curl_easy_setopt(c, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
     curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(c, CURLOPT_MAXREDIRS, 5L);

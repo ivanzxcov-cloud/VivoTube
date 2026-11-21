@@ -1,3 +1,4 @@
+
 name: Build VivoTube
 
 on:
@@ -13,24 +14,22 @@ jobs:
       image: vitasdk/vitasdk:2026.08
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: apk add --no-cache cmake make git
-
-      - name: Configure
+      - name: Configure CMake
         run: |
           cmake -S . -B build \
-            -DCMAKE_TOOLCHAIN_FILE=$VITASDK/share/vita.toolchain.cmake \
+            -DCMAKE_TOOLCHAIN_FILE="$VITASDK/share/vita.toolchain.cmake" \
             -DCMAKE_BUILD_TYPE=Release
 
-      - name: Build
-        run: cmake --build build -j2
+      - name: Build VivoTube
+        run: cmake --build build --parallel 2
 
-      - name: Upload build
+      - name: Upload VPK
         uses: actions/upload-artifact@v4
         with:
-          name: VivoTube-build
-          path: build/**/*.vpk
+          name: VivoTube-VPK
+          path: build/VivoTube.vpk
+          if-no-files-found: error
           

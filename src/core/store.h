@@ -29,6 +29,9 @@ struct Settings {
     bool rememberPosition = true; // resume from history
     bool checkUpdates = true;     // look for a new VivoTube release at startup
     std::string skipVersion;      // release the user chose to skip
+bool proxyEnabled = false;
+std::string proxyHost = "";
+int proxyPort = 8080;
 };
 
 // A playlist kept on the memory card ("Save" > New playlist).

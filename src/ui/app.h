@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "../core/innertube.h"
 #include "../core/google.h"
 #include "../core/rutube.h"
 #include "../core/store.h"

@@ -224,6 +224,7 @@ bool http_init(const std::string& caPath) {
     // Handed to every request from memory: many requests reading the file at once sometimes
     // failed with "Problem with the SSL CA cert".
     if (!caPath.empty() && !read_file(caPath, g_caPem)) g_caPem.clear();
+    VT_LOG(("CA bundle size: %d", (int)g_caPem.size()));
     if (curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) return false;
     g_share = curl_share_init();
     if (g_share) {

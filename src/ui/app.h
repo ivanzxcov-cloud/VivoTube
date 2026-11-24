@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "../core/google.h"
-#include "../core/innertube.h"
+#include "../core/rutube.h"
 #include "../core/store.h"
 #include "../core/update.h"
 #include "../vita/ime.h"
@@ -109,6 +109,7 @@ public:
     void shutdown();
 
     InnerTube yt;
+    Rutube rutube;
     Store store;
     GoogleAccount account;
     JobPool jobs;

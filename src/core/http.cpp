@@ -23,6 +23,10 @@ CURLSH* g_share = nullptr;
 std::mutex g_share_locks[CURL_LOCK_DATA_LAST];
 std::mutex g_pool_mutex;
 std::vector<CURL*> g_pool;
+std::mutex g_proxy_mutex;
+bool g_proxy_enabled = false;
+std::string g_proxy_host;
+int g_proxy_port = 8080;
 const char* kDefaultUA = "Mozilla/5.0 (PlayStation Vita 3.74) AppleWebKit/537.73 (KHTML, like Gecko) Silk/3.2";
 
 std::atomic<bool> g_debug{false};
@@ -250,6 +254,21 @@ HttpResponse http_request(const HttpRequest& req) {
         return res;
     }
     curl_easy_reset(c);
+        std::string proxy;
+    {
+        std::lock_guard<std::mutex> lock(g_proxy_mutex);
+        if (g_proxy_enabled && !g_proxy_host.empty() &&
+            g_proxy_port >= 1 && g_proxy_port <= 65535) {
+            proxy = "http://" + g_proxy_host + ":" + std::to_string(g_proxy_port);
+        }
+    }
+
+    if (!proxy.empty()) {
+        curl_easy_setopt(c, CURLOPT_PROXY, proxy.c_str());
+        curl_easy_setopt(c, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+    } else {
+        curl_easy_setopt(c, CURLOPT_PROXY, "");
+    }
     Sink sink{&res.body, req.maxBytes};
     curl_easy_setopt(c, CURLOPT_URL, req.url.c_str());
     curl_easy_setopt(c, CURLOPT_NOSIGNAL, 1L);
@@ -368,6 +387,12 @@ HttpResponse http_request(const HttpRequest& req) {
 }
 
 void http_set_debug(bool on) { g_debug = on; }
+void http_set_proxy(bool enabled, const std::string& host, int port) {
+    std::lock_guard<std::mutex> lock(g_proxy_mutex);
+    g_proxy_enabled = enabled && !host.empty() && port >= 1 && port <= 65535;
+    g_proxy_host = host;
+    if (port >= 1 && port <= 65535) g_proxy_port = port;
+}
 
 HttpResponse http_get(const std::string& url, const std::string& userAgent, const std::atomic<bool>* cancel) {
     HttpRequest r;

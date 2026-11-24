@@ -187,6 +187,20 @@ void Store::load() {
         settings.rememberPosition = jbool(*d, "rememberPosition", settings.rememberPosition);
         settings.checkUpdates = jbool(*d, "checkUpdates", settings.checkUpdates);
         settings.skipVersion = jstr(jget(*d, "skipVersion"));
+                settings.proxyEnabled = jbool(*d, "proxy_enabled", settings.proxyEnabled);
+
+        std::string proxyHost = jstr(jget(*d, "proxy_host"));
+        if (!proxyHost.empty()) settings.proxyHost = proxyHost;
+
+        int proxyPort = (int)jint(jget(*d, "proxy_port"), settings.proxyPort);
+        if (proxyPort >= 1 && proxyPort <= 65535) settings.proxyPort = proxyPort;
+        settings.proxyEnabled = jbool(*d, "proxy_enabled", settings.proxyEnabled);
+
+std::string proxyHost = jstr(jget(*d, "proxy_host"));
+if (!proxyHost.empty()) settings.proxyHost = proxyHost;
+
+int proxyPort = (int)jint(jget(*d, "proxy_port"), settings.proxyPort);
+if (proxyPort >= 1 && proxyPort <= 65535) settings.proxyPort = proxyPort;
     }
     VT_LOG("store: %u subs, %u history, %u watch later", (unsigned)subs.size(), (unsigned)history.size(),
            (unsigned)watchLater.size());
@@ -363,6 +377,12 @@ void Store::saveSettings() {
     w.Bool(settings.checkUpdates);
     w.Key("skipVersion");
     w.String(settings.skipVersion.c_str());
+    w.Key("proxy_enabled");
+w.Bool(settings.proxyEnabled);
+w.Key("proxy_host");
+w.String(settings.proxyHost.c_str());
+w.Key("proxy_port");
+w.Int(settings.proxyPort);
     w.EndObject();
     save(path("settings.json"), sb);
 }

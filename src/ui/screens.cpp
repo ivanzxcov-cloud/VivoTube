@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstdlib>
+#include "../core/http.h"
 #include <memory>
 #include <set>
 #include <unordered_set>
@@ -2106,6 +2108,52 @@ private:
         };
 
         // Playback
+                // Network / HTTP proxy
+        rows_.push_back({Row::Toggle, "Network", "Use HTTP proxy",
+                         [] { return std::string("Route HTTP and HTTPS requests through a proxy"); },
+                         [st] { return st->proxyEnabled; },
+                         [st, store] {
+                             st->proxyEnabled = !st->proxyEnabled;
+                             store->saveSettings();
+                             http_set_proxy(st->proxyEnabled, st->proxyHost, st->proxyPort);
+                             g_app->toast(st->proxyEnabled ? "HTTP proxy enabled" : "HTTP proxy disabled");
+                         }});
+
+        rows_.push_back({Row::Action, "", "Proxy address",
+                         [st] { return st->proxyHost; }, nullptr, [st, store] {
+                             g_app->textInput("Proxy address", st->proxyHost, [st, store](const std::string& value) {
+                                 std::string host = trim(value);
+                                 if (host.empty()) {
+                                     g_app->toast("Proxy address cannot be empty");
+                                     return;
+                                 }
+                                 st->proxyHost = host;
+                                 store->saveSettings();
+                                 http_set_proxy(st->proxyEnabled, st->proxyHost, st->proxyPort);
+                                 g_app->toast("Proxy address saved");
+                             });
+                         }});
+
+        rows_.push_back({Row::Action, "", "Proxy port",
+                         [st] { return std::to_string(st->proxyPort); }, nullptr, [st, store] {
+                             g_app->textInput("Proxy port", std::to_string(st->proxyPort),
+                                              [st, store](const std::string& value) {
+                                 std::string input = trim(value);
+                                 char* end = nullptr;
+                                 long port = std::strtol(input.c_str(), &end, 10);
+
+                                 if (input.empty() || !end || *end != '\0' ||
+                                     port < 1 || port > 65535) {
+                                     g_app->toast("Invalid proxy port");
+                                     return;
+                                 }
+
+                                 st->proxyPort = (int)port;
+                                 store->saveSettings();
+                                 http_set_proxy(st->proxyEnabled, st->proxyHost, st->proxyPort);
+                                 g_app->toast("Proxy port saved");
+                             });
+                         }});
         rows_.push_back({Row::Choice, "Playback", "Preferred video quality",
                          [st] { return str_printf("%dp " G_DOT " used when available", st->maxHeight); }, nullptr,
                          [st, store] {

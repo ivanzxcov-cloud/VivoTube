@@ -38,6 +38,7 @@ void http_shutdown();
 HttpResponse http_request(const HttpRequest& req);
 // Logs request/response headers and connection details.
 void http_set_debug(bool on);
+void http_set_proxy(bool enabled, const std::string& host, int port);
 
 // Convenience wrappers.
 HttpResponse http_get(const std::string& url, const std::string& userAgent = std::string(),

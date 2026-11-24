@@ -298,12 +298,12 @@ HttpResponse http_request(const HttpRequest& req) {
     }
     curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(c, CURLOPT_SSL_VERIFYHOST, 2L);
-    bool caSet = false;
-    if (!g_caPem.empty()) {
-        curl_blob blob{(void*)g_caPem.data(), g_caPem.size(), CURL_BLOB_NOCOPY};
-        caSet = curl_easy_setopt(c, CURLOPT_CAINFO_BLOB, &blob) == CURLE_OK;
-    }
-    if (!caSet && !g_ca.empty()) curl_easy_setopt(c, CURLOPT_CAINFO, g_ca.c_str());
+   if (!g_ca.empty()) {
+    CURLcode caRc = curl_easy_setopt(c, CURLOPT_CAINFO, g_ca.c_str());
+    VT_LOG("SSL: CAINFO path result = %d", (int)caRc);
+} else {
+    VT_LOG("SSL: CA path is empty");
+   }
     if (g_share) curl_easy_setopt(c, CURLOPT_SHARE, g_share);
     curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, req.connectTimeout);
     curl_easy_setopt(c, CURLOPT_LOW_SPEED_LIMIT, 1L);

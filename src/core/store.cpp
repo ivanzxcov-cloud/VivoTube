@@ -187,18 +187,14 @@ void Store::load() {
         settings.rememberPosition = jbool(*d, "rememberPosition", settings.rememberPosition);
         settings.checkUpdates = jbool(*d, "checkUpdates", settings.checkUpdates);
         settings.skipVersion = jstr(jget(*d, "skipVersion"));
-                settings.proxyEnabled = jbool(*d, "proxy_enabled", settings.proxyEnabled);
+        settings.proxyEnabled = jbool(*d, "proxy_enabled", settings.proxyEnabled);
 
         std::string proxyHost = jstr(jget(*d, "proxy_host"));
         if (!proxyHost.empty()) settings.proxyHost = proxyHost;
+
+        int proxyPort = (int)jint(jget(*d, "proxy_port"), settings.proxyPort);
         if (proxyPort >= 1 && proxyPort <= 65535) settings.proxyPort = proxyPort;
-        settings.proxyEnabled = jbool(*d, "proxy_enabled", settings.proxyEnabled);
-
-std::string proxyHost = jstr(jget(*d, "proxy_host"));
-if (!proxyHost.empty()) settings.proxyHost = proxyHost;
-
-int proxyPort = (int)jint(jget(*d, "proxy_port"), settings.proxyPort);
-if (proxyPort >= 1 && proxyPort <= 65535) settings.proxyPort = proxyPort;
+    }
     }
     VT_LOG("store: %u subs, %u history, %u watch later", (unsigned)subs.size(), (unsigned)history.size(),
            (unsigned)watchLater.size());

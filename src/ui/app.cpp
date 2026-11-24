@@ -7,6 +7,7 @@
 #include <cmath>
 
 #include "../core/util.h"
+#include "../core/http.h"
 
 namespace vt {
 
@@ -38,6 +39,9 @@ bool App::init(const std::string& dir) {
     dataDir = dir;
     store.setDir(dir);
     store.load();
+    http_set_proxy(store.settings.proxyEnabled,
+               store.settings.proxyHost,
+               store.settings.proxyPort);
     account.init(dir);
     std::string err;
     if (!yt.loadProfiles("app0:assets/clients.json", dir + "/clients.json", &err)) VT_LOG("profiles: %s", err.c_str());

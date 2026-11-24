@@ -191,8 +191,6 @@ void Store::load() {
 
         std::string proxyHost = jstr(jget(*d, "proxy_host"));
         if (!proxyHost.empty()) settings.proxyHost = proxyHost;
-
-        int proxyPort = (int)jint(jget(*d, "proxy_port"), settings.proxyPort);
         if (proxyPort >= 1 && proxyPort <= 65535) settings.proxyPort = proxyPort;
         settings.proxyEnabled = jbool(*d, "proxy_enabled", settings.proxyEnabled);
 

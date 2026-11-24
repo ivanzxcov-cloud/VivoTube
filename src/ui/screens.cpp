@@ -722,33 +722,100 @@ private:
         return kPresets;
     }
 
-    void run() {
-        results_.reset();
-        results_.style = filters_.type == 9 ? FeedStyle::Shorts : FeedStyle::Rows;
-        results_.loading = true;
-        std::string q = query_, params = search_params(filters_);
-        uint32_t gen = results_.gen;
-        async<Page>([q, params] { return g_app->yt.search(q, "", params); }, [this, gen](Page& p) {
-            if (gen != results_.gen) return;
-            results_.loading = false;
-            results_.error = p.error;
-            results_.append(p);
-        });
+    
+void run() {
+    results_.reset();
+    results_.style = FeedStyle::Rows;
+    results_.loading = true;
+
+    std::string q = query_;
+    uint32_t gen = results_.gen;
+
+    async<Page>([q] {
+        Page page;
+
+        RutubeSearchResult response = g_app->rutube.search(q, 1);
+        page.error = response.error;
+
+        for (const RutubeVideo& video : response.videos) {
+            Item item;
+            item.type = ItemType::Video;
+            item.id = video.id;
+            item.title = video.title;
+            item.channel = video.author;
+            item.duration = video.duration;
+            item.views = video.views;
+            item.published = video.published;
+            item.thumb = video.thumbnail;
+            item.snippet = video.description;
+
+            page.items.push_back(std::move(item));
+        }
+
+        if (response.videos.size() >= 20)
+            page.continuation = "2";
+
+        return page;
+    }, [this, gen](Page& p) {
+        if (gen != results_.gen) return;
+
+        results_.loading = false;
+        results_.error = p.error;
+        results_.append(p);
+    });
+    
     }
 
-    void more() {
-        results_.loading = true;
-        std::string q = query_, cont = results_.continuation;
-        uint32_t gen = results_.gen;
-        async<Page>([q, cont] { return g_app->yt.search(q, cont); }, [this, gen](Page& p) {
-            if (gen != results_.gen) return;
-            results_.loading = false;
-            if (!p.error.empty()) {
-                results_.error = p.error;
-                return;
-            }
-            results_.append(p);
-        });
+    
+void more() {
+    if (results_.continuation.empty()) return;
+
+    results_.loading = true;
+
+    std::string q = query_;
+    int pageNumber = std::atoi(results_.continuation.c_str());
+    uint32_t gen = results_.gen;
+
+    async<Page>([q, pageNumber] {
+        Page page;
+
+        RutubeSearchResult response =
+            g_app->rutube.search(q, pageNumber);
+
+        page.error = response.error;
+
+        for (const RutubeVideo& video : response.videos) {
+            Item item;
+            item.type = ItemType::Video;
+            item.id = video.id;
+            item.title = video.title;
+            item.channel = video.author;
+            item.duration = video.duration;
+            item.views = video.views;
+            item.published = video.published;
+            item.thumb = video.thumbnail;
+            item.snippet = video.description;
+
+            page.items.push_back(std::move(item));
+        }
+
+        if (response.videos.size() >= 20)
+            page.continuation = std::to_string(pageNumber + 1);
+
+        return page;
+    }, [this, gen](Page& p) {
+        if (gen != results_.gen) return;
+
+        results_.loading = false;
+
+        if (!p.error.empty()) {
+            results_.error = p.error;
+            return;
+        }
+
+        results_.append(p);
+    });
+    
     }
 
     // ---- Filters dialog: each group opens a list; picking applies it right away.

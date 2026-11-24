@@ -666,9 +666,7 @@ public:
         results_.setFocused(!chipsFocus_);
         int a = results_.update(in, list());
         if (a >= 0) {
-            const Item& it = results_.items[a];
-            if (results_.style == FeedStyle::Shorts) g_app->openShort(it, results_.items, a);
-            else g_app->openItem(it);
+    g_app->toast("RUTUBE playback is not connected yet");
         }
         int sa = results_.takeShelfActivated();
         if (sa >= 0) g_app->openShort(results_.shelf[sa], results_.shelf, sa);

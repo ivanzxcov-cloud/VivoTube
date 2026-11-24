@@ -29,7 +29,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -Wall")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -Wno-psabi -Wno-unused-function -fno-strict-aliasing")
 
-file(GLOB CORE_SOURCES src/core/*.cpp)
+file(GLOB CORE_SOURCES CONFIGURE_DEPENDS src/core/*.cpp)
 file(GLOB VITA_SOURCES src/vita/*.cpp)
 file(GLOB UI_SOURCES src/ui/*.cpp)
 

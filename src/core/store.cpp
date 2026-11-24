@@ -195,7 +195,6 @@ void Store::load() {
         int proxyPort = (int)jint(jget(*d, "proxy_port"), settings.proxyPort);
         if (proxyPort >= 1 && proxyPort <= 65535) settings.proxyPort = proxyPort;
     }
-    }
     VT_LOG("store: %u subs, %u history, %u watch later", (unsigned)subs.size(), (unsigned)history.size(),
            (unsigned)watchLater.size());
 }
